@@ -36,7 +36,7 @@ all:	build
 # Pull all submodules
 
 pull:
-	git submodule update --remote --merge && \
+	git submodule foreach 'git pull origin main || git pull origin master' && \
 	cp cacti.patch ./src/cacti/ && \
 	cd ./src/cacti/ && \
 	git reset --hard && \
