@@ -15,10 +15,10 @@
 	url = https://github.com/HewlettPackard/cacti.git
 [submodule "src/src/timeloop"]
 	path = src/src/timeloop
-	url = https://github.com/NVlabs/timeloop.git
+	url = https://github.com/honzastor/timeloop-with-quantization.git
 [submodule "src/timeloop"]
 	path = src/timeloop
-	url = https://github.com/NVlabs/timeloop.git
+	url = https://github.com/honzastor/timeloop-with-quantization.git
 [submodule "src/timeloop-python"]
 	path = src/timeloop-python
 	url = https://github.com/Accelergy-Project/timeloop-python.git
