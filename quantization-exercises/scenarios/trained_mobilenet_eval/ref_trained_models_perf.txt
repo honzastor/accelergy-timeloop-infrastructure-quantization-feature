@@ -1,0 +1,11 @@
+Original MobileNet model trained on Cifar-10 dataset with learning rate 0.075, batch size 64:
+loss: 0.0793 - accuracy: 0.9729 - val_loss: 2.4172 - val_accuracy: 0.6140
+
+MobileNet models quantized using fake-quantization qat (quantization-aware-training) using the original trained model with learning rate 0.0075, batch size 64, all activations set to 8-bit and weight set for individual run to 2-8 bit:
+loss: 4.0740 - accuracy: 0.0995 - val_loss: 2.7122 - val_accuracy: 0.1000
+loss: 1.1046 - accuracy: 0.6084 - val_loss: 1.2899 - val_accuracy: 0.5459
+loss: 0.6717 - accuracy: 0.7585 - val_loss: 1.3429 - val_accuracy: 0.5814
+loss: 0.2300 - accuracy: 0.9168 - val_loss: 1.7562 - val_accuracy: 0.6102
+loss: 0.0952 - accuracy: 0.9680 - val_loss: 2.1136 - val_accuracy: 0.6188
+loss: 0.0622 - accuracy: 0.9799 - val_loss: 2.2753 - val_accuracy: 0.6205
+loss: 0.0580 - accuracy: 0.9818 - val_loss: 2.3163 - val_accuracy: 0.6239

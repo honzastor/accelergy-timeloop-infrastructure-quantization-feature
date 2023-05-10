@@ -1,0 +1,2 @@
+pJ/Compute,Utilization,Cycles,Energy [uJ],EDP [J*cycle],Area [mm^2],LastLevelAccesses,MAC energy [pJ],Computes,Algorithmic computes,Execution runtime [s]
+7.10321,1,144000,261.853,3.770680e+01,11.919706,377766,2.200350,36864000,36864000,13

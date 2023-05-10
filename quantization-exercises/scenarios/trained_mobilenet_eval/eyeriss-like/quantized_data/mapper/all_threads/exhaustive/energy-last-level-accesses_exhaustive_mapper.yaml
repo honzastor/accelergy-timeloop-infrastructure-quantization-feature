@@ -1,0 +1,6 @@
+mapper:
+  optimization-metrics: [ energy, last-level-accesses ]
+  live-status: False
+  algorithm: linear-pruned
+  victory-condition: 0
+  timeout: 0

@@ -1,0 +1,19 @@
+compound_components:
+  version: 0.3
+  classes:
+    - name: lmac
+      attributes:
+        technology: 32nm
+        datawidth: 32
+      subcomponents:
+        - name: fpmac
+          class: fpmac
+          attributes:
+            technology: technology
+            datawidth: datawidth
+      actions:
+        - name: compute
+          subcomponents:
+            - name: fpmac
+              actions:
+                - name: mac_random

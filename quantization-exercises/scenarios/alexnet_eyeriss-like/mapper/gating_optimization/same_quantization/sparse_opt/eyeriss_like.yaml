@@ -1,0 +1,10 @@
+# Just gating optimization for weights scratchpad accesses are considered
+# Based on Inputs values, Weights accesses are gated
+sparse_optimizations:
+  targets:
+    - name: weights_spad
+      action-optimization:
+        - type: gating
+          options:
+            - target: Weights
+              condition-on: [ Inputs ]

@@ -34,6 +34,8 @@ timeloop-model
 timeloop-metrics
 ```
 
+4. The `quantization-exercises` folder contains some test scenarios to show the evaluation of workloads both with and without quantization on chosen HW architectures. Feel free to explore them and modify them to your needs and experiments.
+
 ## GAMMA for Timeloop (optional)
 
 **GAMMA** (Genetic Algorithm-based Mapper for ML Accelerators) is a search heuristic that automates the HW mapping of DNN models on accelerators via genetic algorithm.

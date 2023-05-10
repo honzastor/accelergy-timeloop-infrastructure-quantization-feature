@@ -1,0 +1,12 @@
+mapper:
+  optimization-metrics:  [ delay, energy ]
+  # live-status: True
+  #  diagnostics: True
+  # log-suboptimal: True
+  # log-stats: True
+  #log-oaves: True
+  num-threads: 12 # provide your preferred number of threads
+  timeout: 200
+  victory-condition: 600
+  algorithm: random-pruned
+  max-permutations-per-if-visit: 16
