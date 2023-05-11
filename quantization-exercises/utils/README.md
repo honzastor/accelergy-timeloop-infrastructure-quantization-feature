@@ -11,4 +11,4 @@
 
 * The `parse_xml` folder contains script `parse_xml_timeloop_output.py` for parsing the generated xml stats into .pkl format for further analysis
 
-* The `plot_graphs` contains TODO
+* The `plot_graphs` contains jupyter notebook `plot_graphs.ipynb` to plot graphs for the data contained in the `../scenarios` folder
