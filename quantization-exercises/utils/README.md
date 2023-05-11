@@ -1,9 +1,3 @@
-
-
-* The `parse_xml` folder contains script `parse_xml_timeloop_output.py` for parsing the generated xml stats into .pkl format for further analysis
-
-* The `parse_oaves` folder contains script `oaves_process_data.py` which sorts and cleans an input `.oaves.csv`, removing the sub-optimal mappings
-
 * The `construct_workload` folder contains scripts for automatic creation of problem conv layers into Timeloop's workload yaml format
     - `construct_workloads.py` script is used for generating your own workloads in Timeloop format
     - first you can look into the `temps/cnn_layers.yaml` file to see example descriptions of model's conv layers
@@ -12,5 +6,9 @@
     - this will create the `keras_mobilenet.yaml` file containing the model's conv layers shapes into the `parsed_models` folder
     - then proceed to run the main constructor script `python3 construct_workloads.py <my_dnn_model_name>.yaml`
     - for additional scripts arguments examine their help messages
+
+* The `parse_oaves` folder contains script `oaves_process_data.py` which sorts and cleans an input `.oaves.csv`, removing the sub-optimal mappings
+
+* The `parse_xml` folder contains script `parse_xml_timeloop_output.py` for parsing the generated xml stats into .pkl format for further analysis
 
 * The `plot_graphs` contains TODO
