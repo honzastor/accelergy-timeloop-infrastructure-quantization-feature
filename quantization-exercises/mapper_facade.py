@@ -760,7 +760,7 @@ if __name__ == "__main__":
 
     # Example usage run creating and evaluating workloads for custom user made alexnet pytorch model with non-uniform quantization for each layer (bitwidths=dict)
     json_dict = json_file_to_dict("timeloop_utils/construct_workloads/temps/bitwidths_alexnet_sample.json")
-    results = facade.get_hw_params_create_model(framework="pytorch", model="alexnet", num_classes=1000, batch_size=1, bitwidths=json_dict, input_size="224,224,3", threads="all", heuristic="random", metrics=("edp", ""), cache_dir="an_run_3", clean=True, total_valid=100, verbose=True)
+    results = facade.get_hw_params_create_model(framework="pytorch", model="alexnet", num_classes=1000, batch_size=1, bitwidths=json_dict, input_size="224,224,3", threads="all", heuristic="random", metrics=("edp", ""), cache_dir="an_run_3", clean=True, total_valid=100)
     dict_to_json(results, "results_non_uniform_alexnet.json")
     
     # If you have Keras/Pytorch model, you can use the get_hw_params_parse_model() function instead.

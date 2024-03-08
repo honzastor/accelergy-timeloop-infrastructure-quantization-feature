@@ -108,8 +108,9 @@ login:
 
 install_accelergy:
 	python3 -m pip install setuptools wheel libconf numpy joblib
-	cd src/accelergy-cacti-plug-in && make
-	cd src/accelergy-neurosim-plug-in && make
+	cd src/accelergy-cacti-plug-in && rm -rf cacti && git submodule init && git submodule update && make
+	cd src/accelergy-neurosim-plug-in && git submodule init && git submodule update && make
+	cd src && rm -rf accelergy-table-based-plug-ins && git submodule init && git submodule update --force --init --remote
 	cd src && pip3 install ./accelergy*
 
 install_timeloop:

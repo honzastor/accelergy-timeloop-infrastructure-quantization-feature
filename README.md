@@ -21,7 +21,9 @@ To work with the updated Timeloop+Accelergy locally, you must first download the
 	mkdir timeloop-accelergy
 	cd timeloop-accelergy
 	git clone --recurse-submodules https://github.com/honzastor/accelergy-timeloop-infrastructure-quantization-feature.git
-      make pull
+	git submodule init
+	git submodule update
+	make pull
 	```
 
 	It is preffered to create a Conda environment first using:
@@ -38,14 +40,14 @@ To work with the updated Timeloop+Accelergy locally, you must first download the
 2. Install it. For detailed installation guide (continue after the git clone command) along with the list of required dependencies see [here](https://accelergy.mit.edu/infra_instructions.html).
 
       # Install Accelergy
-      ```bash
-      make install_accelergy
-      ```
+	```bash
+	make install_accelergy
+	```
 
       # Install Timeloop
-      ```bash
-      make install_timeloop
-      ```
+	```bash
+	make install_timeloop
+	```
 
 	**OPTIONAL:** To install the Timeloop for Python API, first build Timeloop and then run the `build_pytimeloop.py` script using **older version of Python** (successfully tested on version **3.8** within the provided Conda environment). Also note, that the shared libraries should be build **dynamically** instead of statically, so use: **scons -j4 --accelergy** instead of **scons -j4 --accelergy --static**. **WARNING:** The pytimeloop interface does not seem to work as intended as of current testing, so you may skip this completely.
 
