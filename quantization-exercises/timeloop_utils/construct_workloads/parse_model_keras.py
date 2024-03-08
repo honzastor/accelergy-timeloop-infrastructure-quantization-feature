@@ -103,12 +103,15 @@ def get_layers_keras(model: tf.keras.Model, input_size: Tuple[int, int, int], ba
             layers.append(layer_dims)
             W, H, C = W_out, H_out, M
 
+        # IGNORE FC
+        """
         elif isinstance(layer, tf.keras.layers.Dense):
             M = layer.units
             # For Dense layers, the spatial dimensions are considered as 1, and the input channels are the flattened features
             layer_dims = (1, 1, C, N, M, 1, 1, 0, 0, 1, 1)
             layers.append(layer_dims)
             W, H, C = 1, 1, M
+        """
 
         # IGNORE POOLING
         """

@@ -1,68 +1,71 @@
 compound_components:
-  version: 0.3
+  version: '0.4'
   classes:
-  - name: smartbuffer_RF
-    attributes:
-      technology: 45nm
-      memory_depth: 12
-      memory_width: 16
-      n_rdwr_ports: 2
-      n_banks: 1
-      n_buffets: 1
-    subcomponents:
-      - name: storage
-        class: regfile
-        attributes:
-          technology: technology
-          width: memory_width
-          depth: memory_depth
-          n_rdwr_ports: n_rdwr_ports
-          n_banks: n_banks
-      - name: address_generators[0..1]
-        class: intadder
-        attributes:
-          technology: technology
-          width: log(memory_depth)
-    actions:
-      - name: write
-        arguments:
-          data_delta: 0..1
-          address_delta: 0..n_banks
-        subcomponents:
-          - name: storage
-            actions:
-              - name: write
-                arguments:
-                  data_delta: data_delta
-                  address_delta: address_delta
-          - name: address_generators[0]
-            actions:
-              - name: add
-          - name: address_generators[1]
-            actions:
-              - name: idle
-      - name: read
-        arguments:
-          data_delta: 0..1
-          address_delta: 0..n_banks
-        subcomponents:
-          - name: storage
-            actions:
-              - name: read
-                arguments:
-                  data_delta: data_delta
-                  address_delta: address_delta
-          - name: address_generators[1]
-            actions:
-              - name: add
-          - name: address_generators[0]
-            actions:
-              - name: idle
-      - name: idle
-        subcomponents:
-          - name: storage
-            actions:
-              - name: idle
-          - name: address_generators[0..1]
-            actions:
-              - name: idle
+    - name: smartbuffer_RF
+      attributes:
+          technology: "must_specify"
+          width: "must_specify"
+          depth: "must_specify"
+          memory_width: max(32, width)
+          memory_depth: max(64, depth)
+          widthscale: width / memory_width
+          depthscale: depth / memory_depth
+          real_depth: depth
+          area_scale: widthscale * depthscale
+          dynamic_energy_scale: widthscale * (depthscale ** (1.56 / 2))
+          static_energy_scale: area_scale
+          n_rdwr_ports: 1
+          global_cycle_seconds: "must_specify"
+      subcomponents:
+        - name: storage
+          class: regfile
+          area_share: area_scale
+          attributes:
+              width: memory_width
+              depth: memory_depth
+              n_rdwr_ports: n_rdwr_ports
+              global_cycle_seconds: global_cycle_seconds
+        - name: address_generators[0..1]
+          class: intadder
+          attributes:
+              n_bits: max(1, ceil(log2(real_depth))) if real_depth >= 1 else 1
+              precision: max(1, ceil(log2(real_depth))) if real_depth >= 1 else
+                  1
+              global_cycle_seconds: global_cycle_seconds
+      actions:
+        - name: write
+          subcomponents:
+            - name: storage
+              actions:
+                - name: write
+                  action_share: dynamic_energy_scale
+            - name: address_generators[0]
+              actions:
+                - name: add
+        - name: read
+          subcomponents:
+            - name: storage
+              actions:
+                - name: read
+                  action_share: dynamic_energy_scale
+            - name: address_generators[1]
+              actions:
+                - name: add
+        - name: leak
+          subcomponents:
+            - name: storage
+              actions:
+                - name: leak
+                  action_share: static_energy_scale
+            - name: address_generators[0..1]
+              actions:
+                - name: leak
+        - name: update
+          subcomponents:
+            - name: storage
+              actions:
+                - name: write
+                  action_share: dynamic_energy_scale
+            - name: address_generators[0]
+              actions:
+                - name: add

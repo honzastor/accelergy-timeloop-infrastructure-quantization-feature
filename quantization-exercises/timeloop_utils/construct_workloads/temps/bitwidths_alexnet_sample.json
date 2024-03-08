@@ -23,20 +23,5 @@
         "Inputs": 8,
         "Weights": 6,
         "Outputs": 8
-    },
-    "ffn1": {
-        "Inputs": 8,
-        "Weights": 6,
-        "Outputs": 8
-    },
-    "ffn2": {
-        "Inputs": 8,
-        "Weights": 7,
-        "Outputs": 8
-    },
-    "ffn3": {
-        "Inputs": 8,
-        "Weights": 8,
-        "Outputs": 8
     }
 }

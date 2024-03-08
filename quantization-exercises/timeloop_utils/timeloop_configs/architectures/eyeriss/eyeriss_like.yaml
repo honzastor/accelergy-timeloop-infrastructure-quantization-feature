@@ -1,77 +1,185 @@
+# ============================================================
+# Architecture Description
+# ============================================================
 architecture:
-  # ============================================================
-  # Architecture Description
-  # ============================================================
-  version: 0.3
-  subtree:
-    - name: system
-      local:
-        - name: DRAM
-          class: DRAM
-          attributes:
-            type: LPDDR4
-            width: 64
-            block-size: 4
-            word-bits: 16
-      subtree:
-        - name: eyeriss
-          attributes:
-            technology: 45nm
-          local:
-            - name: shared_glb
-              class: smartbuffer_SRAM
-              attributes:
-                memory_depth: 12800
-                memory_width: 64
+    version: '0.4'
+    subtree:
+      - name: system_top_level
+        attributes:
+            version: '0.4'
+            technology: "45nm"
+            global_cycle_seconds: 1e-9
+            has_power_gating: false
+        local:
+          - name: DRAM[1..1]
+            class: DRAM
+            attributes:
+                type: "LPDDR4"
+                width: 64
+                datawidth: 8
+                has_power_gating: false
+                n_banks: 2
+                cluster_size: 1
+                reduction_supported: true
+                multiple_buffering: 1
+                min_utilization: 0
+                allow_overbooking: false
+                meshX: 1
+                meshY: 1
+                power_gated_at: "DRAM"
+            required_actions:
+              - update
+              - read
+              - leak
+              - write
+            enabled: true
+          - name: shared_glb[1..1]
+            class: smartbuffer_SRAM
+            attributes:
+                depth: 12800
+                width: 64
                 n_banks: 25
-                block-size: 4
-                word-bits: 16
+                datawidth: 8
                 read_bandwidth: 16
                 write_bandwidth: 16
-            - name: DummyBuffer[0..13] # for better mapping
-              class: regfile
-              attributes:
+                has_power_gating: false
+                cluster_size: 1
+                reduction_supported: true
+                multiple_buffering: 1
+                min_utilization: 0
+                allow_overbooking: false
+                meshX: 1
+                meshY: 1
+                technology: "45nm"
+                power_gated_at: "shared_glb"
+            required_actions:
+              - update
+              - read
+              - leak
+              - write
+            enabled: true
+          - name: inter_PE_column_spatial[1..1]
+            class: dummy_storage
+            attributes:
+                width: 1
+                depth: 1
+                datawidth: 1
+                technology: -1
+                has_power_gating: false
+                n_banks: 2
+                cluster_size: 1
+                reduction_supported: true
+                multiple_buffering: 1
+                min_utilization: 0
+                allow_overbooking: false
+                meshX: 1
+                meshY: 1
+                power_gated_at: "inter_PE_column_spatial"
+            enabled: true
+          - name: inter_PE_spatial[1..14]
+            class: dummy_storage
+            attributes:
+                width: 1
+                depth: 1
+                datawidth: 1
+                technology: -1
+                has_power_gating: false
+                n_banks: 2
+                cluster_size: 1
+                reduction_supported: true
+                multiple_buffering: 1
+                min_utilization: 0
+                allow_overbooking: false
+                meshX: 14
+                meshY: 1
+                power_gated_at: "inter_PE_spatial"
+            enabled: true
+          - name: ifmap_spad[1..168]
+            class: smartbuffer_RF
+            attributes:
+                depth: 12
+                width: 16
+                datawidth: 8
+                read_bandwidth: 2
+                write_bandwidth: 2
+                has_power_gating: false
+                n_banks: 2
+                cluster_size: 1
+                reduction_supported: true
+                multiple_buffering: 1
+                min_utilization: 0
+                allow_overbooking: false
+                meshX: 14
+                meshY: 12
+                technology: "45nm"
+                power_gated_at: "ifmap_spad"
+            required_actions:
+              - update
+              - read
+              - leak
+              - write
+            enabled: true
+          - name: weights_spad[1..168]
+            class: smartbuffer_RF
+            attributes:
+                depth: 224
+                width: 16
+                datawidth: 8
+                read_bandwidth: 2
+                write_bandwidth: 2
+                has_power_gating: false
+                n_banks: 2
+                cluster_size: 1
+                reduction_supported: true
+                multiple_buffering: 1
+                min_utilization: 0
+                allow_overbooking: false
+                meshX: 14
+                meshY: 12
+                technology: "45nm"
+                power_gated_at: "weights_spad"
+            required_actions:
+              - update
+              - read
+              - leak
+              - write
+            enabled: true
+          - name: psum_spad[1..168]
+            class: smartbuffer_RF
+            attributes:
                 depth: 16
                 width: 16
-                word-bits: 16
-                block-size: 1
+                update_fifo_depth: 2
+                datawidth: 8
+                read_bandwidth: 2
+                write_bandwidth: 2
+                has_power_gating: false
+                n_banks: 2
+                cluster_size: 1
+                reduction_supported: true
+                multiple_buffering: 1
+                min_utilization: 0
+                allow_overbooking: false
                 meshX: 14
-          subtree:
-          - name: PE[0..167]
-            local:
-              - name: ifmap_spad
-                class: smartbuffer_RF
-                attributes:
-                  memory_depth: 12
-                  memory_width: 16
-                  block-size: 1
-                  word-bits: 16
-                  meshX: 14
-                  read_bandwidth: 2
-                  write_bandwidth: 2
-              - name: weights_spad
-                class: smartbuffer_SRAM
-                attributes:
-                  memory_depth: 224
-                  memory_width: 16
-                  block-size: 1
-                  word-bits: 16
-                  meshX: 14
-                  read_bandwidth: 2
-                  write_bandwidth: 2
-              - name: psum_spad
-                class: smartbuffer_RF
-                attributes:
-                  memory_depth: 24
-                  memory_width: 16
-                  update_fifo_depth: 2
-                  block-size: 1
-                  word-bits: 16
-                  meshX: 14
-                  read_bandwidth: 2
-                  write_bandwidth: 2
-              - name: mac
-                class: intmac
-                attributes:
-                  datawidth: 16
-                  meshX : 14
+                meshY: 12
+                technology: "45nm"
+                power_gated_at: "psum_spad"
+            required_actions:
+              - update
+              - read
+              - leak
+              - write
+            enabled: true
+          - name: mac[1..168]
+            class: intmac
+            attributes:
+                multiplier_width: 8
+                adder_width: 16
+                has_power_gating: false
+                meshX: 14
+                meshY: 12
+                technology: "45nm"
+                power_gated_at: "mac"
+            required_actions:
+              - compute
+            enabled: true

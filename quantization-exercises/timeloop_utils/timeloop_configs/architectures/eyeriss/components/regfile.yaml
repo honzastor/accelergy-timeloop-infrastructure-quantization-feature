@@ -1,0 +1,133 @@
+compound_components:
+  version: '0.4'
+  classes:
+  - name: regfile_metadata
+    attributes:
+        technology: "must_specify"
+        width: "must_specify"
+        depth: "must_specify"
+        metadata_storage_width: "must_specify"
+        metadata_storage_depth: "must_specify"
+        metadata_counter_width: 0
+    subcomponents:
+      - name: storage
+        class: smartbuffer_RF
+        attributes:
+            width: width
+            depth: depth
+      - name: metadata_storage
+        class: smartbuffer_RF
+        attributes:
+            technology: technology
+            width: metadata_storage_width
+            depth: metadata_storage_depth
+      - name: metadata_counters[0..1]
+        class: intadder
+        attributes:
+            technology: technology
+            datawidth: metadata_counter_width
+    actions:
+      - name: read
+        subcomponents:
+          - name: storage
+            actions:
+              - name: read
+      - name: write
+        subcomponents:
+          - name: storage
+            actions:
+              - name: write
+      - name: update
+        subcomponents:
+          - name: storage
+            actions:
+              - name: write
+      - name: metadata_read
+        subcomponents:
+          - name: metadata_storage
+            actions:
+              - name: read
+      - name: metadata_write
+        subcomponents:
+          - name: metadata_storage
+            actions:
+              - name: write
+      - name: metadata_update
+        subcomponents:
+          - name: metadata_storage
+            actions:
+              - name: write
+      - name: leak
+        subcomponents:
+          - name: storage
+            actions:
+              - name: leak
+                arguments:
+                    global_cycle_seconds: global_cycle_seconds
+          - name: metadata_storage
+            actions:
+              - name: leak
+                arguments:
+                    global_cycle_seconds: global_cycle_seconds
+      - name: decompression_count
+        subcomponents:
+          - name: metadata_counters[1]
+            actions:
+              - name: add
+      - name: compression_count
+        subcomponents:
+          - name: metadata_counters[0]
+            actions:
+              - name: add
+  - name: regfile
+    attributes:
+        technology: "must_specify"
+        width: "must_specify"
+        depth: "must_specify"
+    subcomponents:
+      - name: storage[1..width*depth]
+        class: aladdin_register
+        attributes:
+            global_cycle_seconds: global_cycle_seconds
+      - name: comparator[1..depth]
+        class: aladdin_comparator
+        attributes:
+            n_bits: max(1, ceil(log2(depth)))
+            global_cycle_seconds: global_cycle_seconds
+    actions:
+      - name: write
+        subcomponents:
+          - name: storage[1..width]
+            actions:
+              - name: write
+          - name: comparator[1..depth]
+            actions:
+              - name: compare
+      - name: read
+        subcomponents:
+          - name: storage[1..width]
+            actions:
+              - name: read
+          - name: comparator[1..depth]
+            actions:
+              - name: compare
+      - name: leak
+        subcomponents:
+          - name: storage[1..width*depth]
+            actions:
+              - name: leak
+                arguments:
+                    global_cycle_seconds: global_cycle_seconds
+          - name: comparator[1..depth]
+            actions:
+              - name: leak
+                arguments:
+                    global_cycle_seconds: global_cycle_seconds
+      - name: update
+        subcomponents:
+          - name: storage[1..width]
+            actions:
+              - name: write
+          - name: comparator[1..depth]
+            actions:
+              - name: compare

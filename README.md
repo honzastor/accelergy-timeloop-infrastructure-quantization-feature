@@ -15,24 +15,53 @@ Useful links:
 
 To work with the updated Timeloop+Accelergy locally, you must first download the infrastructure containing the quantization feature update, then build it and export PATHs to the compiled binary files to allow execution from any location.
 
+### Setup
 1. Clone the repository:
-```bash
-mkdir timeloop-accelergy
-cd timeloop-accelergy
-git clone --recurse-submodules https://github.com/honzastor/accelergy-timeloop-infrastructure-quantization-feature.git
-```
+	```bash
+	mkdir timeloop-accelergy
+	cd timeloop-accelergy
+	git clone --recurse-submodules https://github.com/honzastor/accelergy-timeloop-infrastructure-quantization-feature.git
+      make pull
+	```
 
-2. Install it. For detailed installation guide (continue after the git clone command) along with the list of required dependencies see [here](https://accelergy.mit.edu/infra_instructions.html)
+	It is preffered to create a Conda environment first using:
+
+	```bash
+	conda env create --file env_setup.yml
+	```
+
+	And activate the environment:
+	```bash
+	conda activate timeloop_quantization
+	```
+
+2. Install it. For detailed installation guide (continue after the git clone command) along with the list of required dependencies see [here](https://accelergy.mit.edu/infra_instructions.html).
+
+      # Install Accelergy
+      ```bash
+      make install_accelergy
+      ```
+
+      # Install Timeloop
+      ```bash
+      make install_timeloop
+      ```
+
+	**OPTIONAL:** To install the Timeloop for Python API, first build Timeloop and then run the `build_pytimeloop.py` script using **older version of Python** (successfully tested on version **3.8** within the provided Conda environment). Also note, that the shared libraries should be build **dynamically** instead of statically, so use: **scons -j4 --accelergy** instead of **scons -j4 --accelergy --static**. **WARNING:** The pytimeloop interface does not seem to work as intended as of current testing, so you may skip this completely.
 
 3. Test it. Once it is done, you can check successful installation by running the binaries from any location, i.e.:
-```bash
-accelergy
-accelergyTables
+	```bash
+	accelergy
+	accelergyTables
 
-timeloop-mapper
-timeloop-model
-timeloop-metrics
-```
+	timeloop-mapper
+	timeloop-model
+	timeloop-metrics
+
+	# OPTIONAL PYTHON API
+	timeloop-model.py --help
+	timeloop-mapper.py --help
+	```
 
 4. The `quantization-exercises` folder contains some test scenarios to show the evaluation of workloads both with and without quantization on chosen HW architectures. Feel free to explore them and modify them to your needs and experiments.
 

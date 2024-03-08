@@ -3,39 +3,107 @@
 #
 architecture_constraints:
   targets:
-    # certain buffer only stores certain datatypes
-    - target: PEWeightRegs
-      type: datatype
-      keep: [Weights]
-      bypass: [Inputs, Outputs]
-    - target: PEAccuBuffer
-      type: datatype
-      keep: [Outputs]
-      bypass: [Weights, Inputs]
-    - target: PEWeightBuffer
-      type: datatype
-      keep: [Weights]
-      bypass: [Inputs, Outputs]
-    - target: PEInputBuffer
-      type: datatype
-      keep: [Inputs]
-      bypass: [Weights, Outputs]
-    - target: GlobalBuffer
-      type: datatype
-      keep: [Inputs, Outputs]
-      bypass: [Weights]
-    # do not allow parallel-for for P, Q, R, S, M, N
-    - target: PEAccuBuffer
-      type: spatial
-      factors: P=1 Q=1 R=1 S=1 M=1 N=1
-      permutation: CMQRSPN
-    # do not allow parallel-for for P, Q, R, S, C, N
-    - target: PEInputBuffer
-      type: spatial
-      factors: P=1 Q=1 R=1 S=1 C=1 N=1
-      permutation: MCQRSPN
-    # do not allow parallel-for for P, Q, R, S, N
-    - target: GlobalBuffer
-      type: spatial
-      factors: R=1 S=1 P=1 Q=1 N=1
+    - type: temporal
+      permutation: N
+      target: DRAM
+    - keep:
+        - Inputs
+        - Outputs
+      bypass:
+        - Weights
+      type: bypass
+      target: GlobalBuffer
+    - type: temporal
+      permutation: N
+      target: GlobalBuffer
+    - type: spatial
+      factors: R=1,S=1,P=1,Q=1,N=1
       permutation: MCRSPQN
+      target: inter_PE_spatial
+    - factors: C=1,M=1,R=1,S=1,N=1,P=1,Q=1
+      permutation: CMRSNPQ
+      type: temporal
+      target: inter_PE_spatial
+    - bypass:
+        - Weights
+        - Inputs
+        - Outputs
+      type: bypass
+      target: inter_PE_spatial
+    - keep:
+        - Inputs
+      bypass:
+        - Weights
+        - Outputs
+      type: bypass
+      target: PEInputBuffer
+    - type: temporal
+      permutation: N
+      target: PEInputBuffer
+    - type: spatial
+      factors: P=1,Q=1,R=1,S=1,C=1,N=1
+      permutation: MCQRSPN
+      target: inter_distributed_buffers_spatial
+    - factors: C=1,M=1,R=1,S=1,N=1,P=1,Q=1
+      permutation: CMRSNPQ
+      type: temporal
+      target: inter_distributed_buffers_spatial
+    - bypass:
+        - Weights
+        - Inputs
+        - Outputs
+      type: bypass
+      target: inter_distributed_buffers_spatial
+    - keep:
+        - Weights
+      bypass:
+        - Inputs
+        - Outputs
+      type: bypass
+      target: PEWeightBuffer
+    - type: temporal
+      permutation: N
+      target: PEWeightBuffer
+    - keep:
+        - Outputs
+      bypass:
+        - Inputs
+        - Weights
+      type: bypass
+      target: PEAccuBuffer
+    - type: temporal
+      permutation: N
+      target: PEAccuBuffer
+    - type: spatial
+      factors: P=1,Q=1,R=1,S=1,M=1,N=1
+      permutation: CMQRSPN
+      target: inter_reg_mac_spatial
+    - factors: C=1,M=1,R=1,S=1,N=1,P=1,Q=1
+      permutation: CMRSNPQ
+      type: temporal
+      target: inter_reg_mac_spatial
+    - bypass:
+        - Weights
+        - Inputs
+        - Outputs
+      type: bypass
+      target: inter_reg_mac_spatial
+    - keep:
+        - Weights
+      bypass:
+        - Inputs
+        - Outputs
+      type: bypass
+      target: PEWeightRegs
+    - type: temporal
+      permutation: N
+      target: PEWeightRegs
+
+mapspace:
+    version: '0.4'
+    template: ruby
+globals:
+    version: '0.4'
+    environment_variables:
+        TIMELOOP_HIDE_INCONSEQUENTIAL_STATS: 1
+    expression_custom_functions: []

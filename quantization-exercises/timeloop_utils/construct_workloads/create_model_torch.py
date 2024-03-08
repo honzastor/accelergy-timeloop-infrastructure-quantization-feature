@@ -97,11 +97,14 @@ def get_layers_pytorch(model: torch.nn.Module, input_size: Tuple[int, int, int],
             # print(f"out_size: {W}x{H}")
             C = M
 
+        # IGNORE FC
+        """
         elif isinstance(m, torch.nn.Linear):
             M = m.out_features
             layer = (1, 1, C, N, M, 1, 1, 0, 0, 1, 1)
             layers.append(layer)
             C = M
+        """
 
         # IGNORE POOLING
         """

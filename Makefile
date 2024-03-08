@@ -20,7 +20,7 @@ DOCKER_NAME ?= timeloopaccelergy
 VERSION := 0.2
 
 USER    := timeloopaccelergy
-REPO    := accelergy-timeloop-infrastructure
+REPO    := accelergy-timeloop-infrastructure-quantization-feature
 
 NAME    := ${USER}/${REPO}
 TAG     := $$(git log -1 --pretty=%h)
@@ -29,6 +29,9 @@ IMG     := ${NAME}:${TAG}
 ALTTAG  := latest
 ALTIMG  := ${NAME}:${ALTTAG}
 
+# For Timeloop installation
+BARVINOK_VER ?= 0.41.6
+NTL_VER      ?= 11.5.1
 
 all:	build
 
@@ -36,12 +39,18 @@ all:	build
 # Pull all submodules
 
 pull:
-	git submodule foreach 'git pull origin main || git pull origin master' && \
+	# Only update top-level submodules
+	GIT_MAX_RECURSION=1 git submodule update --remote --merge --recursive
+
 	cp cacti.patch ./src/cacti/ && \
 	cd ./src/cacti/ && \
 	git reset --hard && \
-	git apply cacti.patch && \
-	cd ../../
+	git apply cacti.patch
+
+	cp cacti.patch ./src/accelergy-cacti-plug-in/cacti/ &&  \
+	cd ./src/accelergy-cacti-plug-in/cacti/ && \
+	git reset --hard && \
+	git apply cacti.patch
 
 # Build and tag docker image
 build-amd64:
@@ -97,3 +106,75 @@ lint:
 login:
 	"${DOCKER_EXE}" login --username ${DOCKER_NAME} --password ${DOCKER_PASS}
 
+install_accelergy:
+	python3 -m pip install setuptools wheel libconf numpy joblib
+	cd src/accelergy-cacti-plug-in && make
+	cd src/accelergy-neurosim-plug-in && make
+	cd src && pip3 install ./accelergy*
+
+install_timeloop:
+	@if [ -z "$$(conda env list | grep timeloop_quantization)" ]; then \
+		echo "Creating conda environment 'timeloop_quantization'"; \
+		conda env create --file env_setup.yml; \
+	else \
+		echo "Conda environment 'timeloop_quantization' already exists"; \
+	fi
+	@echo "Activating conda environment 'timeloop_quantization'"
+	@. $$(conda info --base)/etc/profile.d/conda.sh; \
+	conda activate timeloop_quantization; \
+	mkdir -p /tmp/build-timeloop
+
+	sudo apt-get update \
+		&& sudo DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata \
+		&& sudo apt-get install -y --no-install-recommends \
+						locales \
+						curl \
+						git \
+						wget \
+						python3-dev \
+						python3-pip \
+						scons \
+						make \
+						autotools-dev \
+						autoconf \
+						automake \
+						libtool \
+		&& sudo apt-get install -y --no-install-recommends \
+						g++ \
+						cmake
+
+	sudo apt-get update \
+		&& sudo apt-get install -y --no-install-recommends \
+						g++ \
+						libconfig++-dev \
+						libboost-dev \
+						libboost-iostreams-dev \
+						libboost-serialization-dev \
+						libyaml-cpp-dev \
+						libncurses5-dev \
+						libtinfo-dev \
+						libgpm-dev \
+						libgmp-dev
+
+	cd /tmp/build-timeloop \
+		&& wget https://libntl.org/ntl-${NTL_VER}.tar.gz \
+		&& tar -xvzf ntl-${NTL_VER}.tar.gz \
+		&& cd ntl-${NTL_VER}/src \
+		&& ./configure NTL_GMP_LIP=on SHARED=on \
+		&& make \
+		&& sudo make install
+
+	cd /tmp/build-timeloop \
+	    && wget https://barvinok.sourceforge.io/barvinok-${BARVINOK_VER}.tar.gz \
+		&& tar -xvzf barvinok-${BARVINOK_VER}.tar.gz \
+		&& cd barvinok-${BARVINOK_VER} \
+		&& ./configure --enable-shared-barvinok \
+		&& make \
+		&& sudo make install
+
+	cd src/timeloop \
+		&& cp -r pat-public/src/pat src/pat  \
+		&& scons -j4 --with-isl --static --accelergy
+	cp src/timeloop/build/timeloop-mapper  ~/anaconda3/envs/timeloop_quantization/bin/timeloop-mapper
+	cp src/timeloop/build/timeloop-metrics ~/anaconda3/envs/timeloop_quantization/bin/timeloop-metrics
+	cp src/timeloop/build/timeloop-model ~/anaconda3/envs/timeloop_quantization/bin/timeloop-model

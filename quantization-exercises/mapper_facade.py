@@ -430,40 +430,35 @@ class MapperFacade:
             Dict[str, Any]: The modified mapper configuration dictionary.
         """
         mapper_config["mapper"]["out_prefix"] = f"{self._mode}_{self._thread_id}"
-        mapper_config["mapper"]["optimization-metrics"] = list(metrics) if metrics[1] else [metrics[0]]
-        mapper_config["mapper"]["search-size"] = total_valid
+        mapper_config["mapper"]["optimization_metrics"] = list(metrics) if metrics[1] else [metrics[0]]
+        mapper_config["mapper"]["search_size"] = total_valid
 
         if log_all:
-            mapper_config["mapper"]["log-oaves"] = True
-            mapper_config["mapper"]["log-suboptimal"] = True
-            mapper_config["mapper"]["log-all"] = True
-            mapper_config["mapper"]["log-stats"] = True
+            mapper_config["mapper"]["log_oaves"] = True
+            mapper_config["mapper"]["log_suboptimal"] = True
+            mapper_config["mapper"]["log_all"] = True
+            mapper_config["mapper"]["log_stats"] = True
 
         if isinstance(threads, int):
-            mapper_config["mapper"]["num-threads"] = threads
+            mapper_config["mapper"]["num_threads"] = threads
+
+        if total_valid == 0:
+            mapper_config["mapper"]["victory_condition"] = 500
+            mapper_config["mapper"]["max_permutations_per_if_visit"] = 16
+            mapper_config["mapper"]["timeout"] = 15000
+        else:
+            mapper_config["mapper"]["victory_condition"] = 0
+            mapper_config["mapper"]["max_permutations_per_if_visit"] = 0
+            mapper_config["mapper"]["timeout"] = 2**32 - 1  # max UINT32 value
 
         if heuristic == "exhaustive":
-            mapper_config["mapper"]["algorithm"] = "linear-pruned"
-            mapper_config["mapper"]["victory-condition"] = 0
-            mapper_config["mapper"]["timeout"] = 0
-            # Remove the "max-permutations-per-if-visit" if it exists
-            mapper_config["mapper"].pop("max-permutations-per-if-visit", None)
-        else:
-            if total_valid == 0:
-                mapper_config["mapper"]["victory-condition"] = 500
-                mapper_config["mapper"]["max-permutations-per-if-visit"] = 16
-                mapper_config["mapper"]["timeout"] = 15000
-            else:
-                mapper_config["mapper"].pop("victory-condition", None)
-                mapper_config["mapper"].pop("max-permutations-per-if-visit", None)
-                mapper_config["mapper"].pop("timeout", None)
-
-            if heuristic == "random":
-                mapper_config["mapper"]["algorithm"] = "random-pruned"
-            elif heuristic == "linear":
-                mapper_config["mapper"]["algorithm"] = "linear-pruned"
-            elif heuristic == "hybrid":
-                mapper_config["mapper"]["algorithm"] = "hybrid"
+            mapper_config["mapper"]["algorithm"] = "exhaustive"
+        elif heuristic == "random":
+            mapper_config["mapper"]["algorithm"] = "random_pruned"
+        elif heuristic == "linear":
+            mapper_config["mapper"]["algorithm"] = "linear_pruned"
+        elif heuristic == "hybrid":
+            mapper_config["mapper"]["algorithm"] = "hybrid"
 
         return mapper_config
 
@@ -742,7 +737,7 @@ class MapperFacade:
 if __name__ == "__main__":
     # For example runs
     facade = MapperFacade()
-
+    
     # Example usage run creating and evaluating workloads for alexnet pytorch model with no quantization (bitwidths=None) for 100 total valid mappings per layer (for fast search)
     results = facade.get_hw_params_create_model(framework="pytorch", model="vgg16", batch_size=1, bitwidths=None, input_size="224,224,3", threads="all", heuristic="random", metrics=("edp", ""), cache_dir="vgg16_torch", total_valid=100)
     dict_to_json(results, "res_native_vgg16_torch.json")
@@ -752,23 +747,21 @@ if __name__ == "__main__":
     dict_to_json(results, "res_native_vgg16_keras.json")
 
     # Example usage run creating and evaluating workloads for alexnet pytorch model (classifying 1000 classes) with no quantization (bitwidths=None)
-    """
-    results = facade.get_hw_params_create_model(framework="pytorch", model="alexnet", num_classes=1000, batch_size=1, bitwidths=None, input_size="224,224,3", threads="all", heuristic="exhaustive", metrics=("edp", ""), cache_dir="an_run_1", clean=True)
+    results = facade.get_hw_params_create_model(framework="pytorch", model="alexnet", num_classes=1000, batch_size=1, bitwidths=None, input_size="224,224,3", threads="all", heuristic="random", metrics=("edp", ""), cache_dir="an_run_1", clean=True, total_valid=100)
+    dict_to_json(results, "results_native_alexnet.json")    
+
+    # Example usage run creating and evaluating workloads for alexnet pytorch model (classifying 1000 classes) with no quantization (bitwidths=None)
+    results = facade.get_hw_params_create_model(framework="pytorch", model="alexnet", num_classes=1000, batch_size=1, bitwidths=None, input_size="224,224,3", threads="all", heuristic="random", metrics=("edp", ""), cache_dir="an_run_1", clean=True, total_valid=100)
     dict_to_json(results, "results_native_alexnet.json")
-    """
 
     # Example usage run creating and evaluating workloads for alexnet pytorch model (classifying 1000 classes) with uniform quantization for each layer (bitwidths=(8,4,8))
-    """
-    results = facade.get_hw_params_create_model(framework="pytorch", model="alexnet", num_classes=1000, batch_size=1, bitwidths=(8,4,8), input_size="224,224,3", threads="all", heuristic="exhaustive", metrics=("edp", ""), cache_dir="an_run_2", clean=True)
+    results = facade.get_hw_params_create_model(framework="pytorch", model="alexnet", num_classes=1000, batch_size=1, bitwidths=(8,4,8), input_size="224,224,3", threads="all", heuristic="random", metrics=("edp", ""), cache_dir="an_run_2", clean=True, total_valid=100)
     dict_to_json(results, "results_uniform_alexnet.json")
-    """
 
     # Example usage run creating and evaluating workloads for custom user made alexnet pytorch model with non-uniform quantization for each layer (bitwidths=dict)
-    """
     json_dict = json_file_to_dict("timeloop_utils/construct_workloads/temps/bitwidths_alexnet_sample.json")
-    results = facade.get_hw_params_create_model(framework="pytorch", model="alexnet", num_classes=1000, batch_size=1, bitwidths=json_dict, input_size="224,224,3", threads="all", heuristic="random", metrics=("edp", ""), cache_dir="an_run_3", clean=True)
+    results = facade.get_hw_params_create_model(framework="pytorch", model="alexnet", num_classes=1000, batch_size=1, bitwidths=json_dict, input_size="224,224,3", threads="all", heuristic="random", metrics=("edp", ""), cache_dir="an_run_3", clean=True, total_valid=100, verbose=True)
     dict_to_json(results, "results_non_uniform_alexnet.json")
-    """
     
     # If you have Keras/Pytorch model, you can use the get_hw_params_parse_model() function instead.
     

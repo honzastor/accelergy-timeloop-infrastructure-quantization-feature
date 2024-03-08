@@ -1,8 +1,8 @@
 mapper:
-  optimization-metrics: [ edp ]
-  log-oaves: True
-  live-status: False
+  optimization_metrics: [ edp ]
+  log_oaves: True
+  live_status: False
   timeout: 15000
-  victory-condition: 500
+  victory_condition: 500
   algorithm: random-pruned
-  max-permutations-per-if-visit: 16
+  max_permutations_per_if_visit: 16

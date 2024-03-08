@@ -113,10 +113,10 @@ def rewrite_workload_bounds(src: str, dst: str, workload_bounds: WorkloadBounds,
         print('  P        =', p)
         print('  Q        =', q)
         print('  N        =', n)
-        print('  W-pad    =', wpad)
-        print('  H-pad    =', hpad)
-        print('  W-stride =', wstride)
-        print('  H-stride =', hstride)
+        print('  W_pad    =', wpad)
+        print('  H_pad    =', hpad)
+        print('  W_stride =', wstride)
+        print('  H_stride =', hstride)
         print()
 
     with open(src, "r") as f:

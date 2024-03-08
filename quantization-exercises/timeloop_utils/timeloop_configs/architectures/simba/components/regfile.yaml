@@ -1,30 +1,26 @@
 compound_components:
   version: '0.4'
   classes:
-    - name: smartbuffer_metadata
+    - name: regfile_metadata
       attributes:
           technology: "must_specify"
           width: "must_specify"
           depth: "must_specify"
           metadata_storage_width: "must_specify"
           metadata_storage_depth: "must_specify"
-          n_rdwr_ports: 1
           metadata_counter_width: 0
       subcomponents:
         - name: storage
-          class: smartbuffer_SRAM
+          class: smartbuffer_RF
           attributes:
-              technology: technology
               width: width
               depth: depth
-              n_rdwr_ports: n_rdwr_ports
         - name: metadata_storage
-          class: smartbuffer_SRAM
+          class: smartbuffer_RF
           attributes:
               technology: technology
               width: metadata_storage_width
               depth: metadata_storage_depth
-              n_rdwr_ports: n_rdwr_ports
         - name: metadata_counters[0..1]
           class: intadder
           attributes:
@@ -83,58 +79,55 @@ compound_components:
             - name: metadata_counters[0]
               actions:
                 - name: add
-    - name: smartbuffer_SRAM
+    - name: regfile
       attributes:
           technology: "must_specify"
           width: "must_specify"
           depth: "must_specify"
-          n_rw_ports: 1
-          global_cycle_seconds: "must_specify"
       subcomponents:
-        - name: storage
-          class: SRAM
+        - name: storage[1..width*depth]
+          class: aladdin_register
           attributes:
-              width: width
-              depth: depth
-              n_rw_ports: n_rw_ports
-              technology: technology
               global_cycle_seconds: global_cycle_seconds
-        - name: address_generators[0..1]
-          class: intadder
+        - name: comparator[1..depth]
+          class: aladdin_comparator
           attributes:
-              n_bits: max(1, ceil(log2(depth))) if depth >= 1 else 1
-              precision: max(1, ceil(log2(depth))) if depth >= 1 else 1
+              n_bits: max(1, ceil(log2(depth)))
               global_cycle_seconds: global_cycle_seconds
       actions:
         - name: write
           subcomponents:
-            - name: storage
+            - name: storage[1..width]
               actions:
                 - name: write
-            - name: address_generators[0]
+            - name: comparator[1..depth]
               actions:
-                - name: add
+                - name: compare
         - name: read
           subcomponents:
-            - name: storage
+            - name: storage[1..width]
               actions:
                 - name: read
-            - name: address_generators[1]
+            - name: comparator[1..depth]
               actions:
-                - name: add
+                - name: compare
         - name: leak
           subcomponents:
-            - name: storage
+            - name: storage[1..width*depth]
               actions:
                 - name: leak
-            - name: address_generators[0..1]
+                  arguments:
+                      global_cycle_seconds: global_cycle_seconds
+            - name: comparator[1..depth]
               actions:
                 - name: leak
+                  arguments:
+                      global_cycle_seconds: global_cycle_seconds
         - name: update
           subcomponents:
-            - name: storage
+            - name: storage[1..width]
               actions:
                 - name: write
-            - name: address_generators[0]
+            - name: comparator[1..depth]
               actions:
-                - name: add
+                - name: compare
